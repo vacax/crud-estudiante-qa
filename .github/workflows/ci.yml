@@ -1,0 +1,278 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'defecto/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Cadena fail-fast: cada job exige (needs) que el anterior termine en verde.
+# Las ramas defecto/** rompen a propósito un nivel y los siguientes no corren.
+jobs:
+  calidad:
+    name: Calidad (Spotless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # VERIFICAR: el prompt pide JDK 21; se usa 25 porque el stack es Java 25 LTS
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - run: ./gradlew spotlessCheck
+
+  unit:
+    name: Nivel 1 - Unitarias
+    runs-on: ubuntu-latest
+    needs: calidad
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # VERIFICAR: el prompt pide JDK 21; se usa 25 porque el stack es Java 25 LTS
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - run: ./gradlew test
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: reportes-test
+          path: |
+            build/reports/tests/test
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: resultados-test
+          path: |
+            build/test-results/test
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: jacoco-test
+          path: |
+            build/jacoco/test.exec
+          if-no-files-found: ignore
+
+  integracion:
+    name: Nivel 2 - Integración
+    runs-on: ubuntu-latest
+    needs: unit
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # VERIFICAR: el prompt pide JDK 21; se usa 25 porque el stack es Java 25 LTS
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - run: ./gradlew integrationTest
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: reportes-integrationTest
+          path: |
+            build/reports/tests/integrationTest
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: resultados-integrationTest
+          path: |
+            build/test-results/integrationTest
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: jacoco-integrationTest
+          path: |
+            build/jacoco/integrationTest.exec
+          if-no-files-found: ignore
+
+  aceptacion:
+    name: Nivel 3 - Aceptación
+    runs-on: ubuntu-latest
+    needs: integracion
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # VERIFICAR: el prompt pide JDK 21; se usa 25 porque el stack es Java 25 LTS
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - run: ./gradlew acceptanceTest
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: reportes-acceptanceTest
+          path: |
+            build/reports/tests/acceptanceTest
+            build/reports/cucumber
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: resultados-acceptanceTest
+          path: |
+            build/test-results/acceptanceTest
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: jacoco-acceptanceTest
+          path: |
+            build/jacoco/acceptanceTest.exec
+          if-no-files-found: ignore
+
+  build-imagen:
+    name: Construir imagen Docker
+    runs-on: ubuntu-latest
+    needs: aceptacion
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: docker build -t crud-estudiante-qa:local .
+      - run: docker save crud-estudiante-qa:local | gzip > imagen.tar.gz
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: imagen-docker
+          path: imagen.tar.gz
+          retention-days: 1
+          compression-level: 0
+
+  e2e:
+    name: Nivel 4 - E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: build-imagen
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # VERIFICAR: el prompt pide JDK 21; se usa 25 porque el stack es Java 25 LTS
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: imagen-docker
+      - run: gunzip -c imagen.tar.gz | docker load
+      - run: ./gradlew instalarNavegadores -PplaywrightArgs="install --with-deps chromium"
+      # La imagen ya viene cargada: se omite construirImagen.
+      - run: ./gradlew e2eTest -PomitirConstruccionImagen
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: reportes-e2eTest
+          path: |
+            build/reports/tests/e2eTest
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: resultados-e2eTest
+          path: |
+            build/test-results/e2eTest
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: e2e-trazas-capturas
+          path: |
+            build/reports/e2e
+          if-no-files-found: ignore
+
+  reportes:
+    name: Reportes (JaCoCo, PIT y resultados JUnit)
+    runs-on: ubuntu-latest
+    needs: e2e
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      checks: write # EnricoMi crea el check run con los resultados
+      # pull-requests: write solo haría falta para comentar en el PR (comment_mode: off).
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # VERIFICAR: el prompt pide JDK 21; se usa 25 porque el stack es Java 25 LTS
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      # Los .exec llegan como artefactos de unit/integracion/aceptacion (jacoco-*) y se
+      # reúnen en build/jacoco. Es más simple y barato que re-ejecutar las tres suites (dos
+      # necesitan Docker); jacocoReporteCombinado y verificarCobertura usan fileTree sin
+      # dependsOn, así Gradle no intenta volver a ejecutar los tests.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: jacoco-*
+          path: build/jacoco
+          merge-multiple: true
+      - run: ./gradlew jacocoReporteCombinado verificarCobertura
+      - run: ./gradlew pitest
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: jacoco-combinado
+          path: |
+            build/reports/jacoco/combinado
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: pit-mutaciones
+          path: |
+            build/reports/pitest
+          if-no-files-found: ignore
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: always()
+        with:
+          pattern: resultados-*
+          path: resultados
+      # Publica los XML JUnit de todos los niveles. No corre en forks (token de solo lectura).
+      - uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        with:
+          files: resultados/**/*.xml
+          comment_mode: off

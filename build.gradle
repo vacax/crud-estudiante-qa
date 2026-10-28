@@ -3,6 +3,7 @@ plugins {
     id 'java-test-fixtures'
     id 'jvm-test-suite'
     id 'jacoco'
+    alias(libs.plugins.pitest)
     alias(libs.plugins.spotless)
 }
 
@@ -163,6 +164,73 @@ tasks.named('jacocoTestReport') {
         xml.required = true
         html.required = true
     }
+}
+
+// JaCoCo combinado: une los .exec de las tres suites que los generan (test, integrationTest,
+// acceptanceTest). Se usa fileTree SIN dependsOn a proposito: en CI los .exec llegan como
+// artefactos de los jobs anteriores y Gradle no debe intentar re-ejecutar (ni exigir Docker).
+// En local, ejecuta antes las suites: ./gradlew test integrationTest acceptanceTest jacocoReporteCombinado
+def datosEjecucion = fileTree(layout.buildDirectory.dir('jacoco')) {
+    include 'test.exec', 'integrationTest.exec', 'acceptanceTest.exec'
+}
+
+tasks.register('jacocoReporteCombinado', JacocoReport) {
+    group = 'verification'
+    description = 'Reporte JaCoCo combinado (unit + integracion + aceptacion)'
+    executionData.from(datosEjecucion)
+    // Solo ordena (no depende): si las suites se piden en la misma corrida, van antes.
+    mustRunAfter(tasks.named('test'), tasks.named('integrationTest'), tasks.named('acceptanceTest'))
+    classDirectories.from(sourceSets.main.output)
+    sourceDirectories.from(sourceSets.main.allSource.srcDirs)
+    reports {
+        xml.required = true
+        html.required = true
+        xml.outputLocation = layout.buildDirectory.file('reports/jacoco/combinado/jacoco.xml')
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/combinado')
+    }
+}
+
+// Umbral sobre la capa de servicio (reglas de negocio). Medido en la fase 6A; ver reporte.
+// No se engancha a 'check' porque 'check' no ejecuta integrationTest/acceptanceTest (Docker):
+// la ejecuta el job CI 'reportes', que falla el build si la cobertura baja del umbral.
+tasks.register('verificarCobertura', JacocoCoverageVerification) {
+    group = 'verification'
+    description = 'Falla si la cobertura combinada del paquete servicio baja del umbral'
+    executionData.from(datosEjecucion)
+    // Solo ordena (no depende): si las suites se piden en la misma corrida, van antes.
+    mustRunAfter(tasks.named('test'), tasks.named('integrationTest'), tasks.named('acceptanceTest'))
+    classDirectories.from(sourceSets.main.output)
+    sourceDirectories.from(sourceSets.main.allSource.srcDirs)
+    violationRules {
+        rule {
+            element = 'PACKAGE'
+            includes = ['edu.pucmm.estudiante.servicio']
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.90
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.85
+            }
+        }
+    }
+}
+
+// Mutation testing (PIT) sobre servicio y dominio, con la suite unitaria.
+pitest {
+    pitestVersion = libs.versions.pitest.get()
+    junit5PluginVersion = libs.versions.pitestJunit5.get()
+    targetClasses = ['edu.pucmm.estudiante.servicio.*', 'edu.pucmm.estudiante.dominio.*']
+    targetTests = ['edu.pucmm.estudiante.*']
+    outputFormats = ['HTML', 'XML']
+    timestampedReports = false
+    threads = 4
+    // Medido: 90% (35/39). Umbral con margen; falla el build si se debilitan las pruebas.
+    mutationThreshold = 85
+    mutators = ['DEFAULTS']
 }
 
 spotless {
