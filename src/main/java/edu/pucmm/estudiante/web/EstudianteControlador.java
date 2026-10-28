@@ -71,7 +71,8 @@ public class EstudianteControlador {
 
   private void crear(Context ctx) {
     var creado = servicio.crear(cuerpo(ctx));
-    ctx.status(HttpStatus.CREATED).header("Location", RUTA + "/" + creado.id()).json(creado);
+    // DEFECTO SEMBRADO: debería responder 201 Created con el encabezado Location.
+    ctx.status(HttpStatus.OK).json(creado);
   }
 
   private void actualizar(Context ctx) {
