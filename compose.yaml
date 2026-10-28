@@ -16,7 +16,8 @@ services:
     image: ${APP_IMAGEN:-crud-estudiante-qa:local}
     build: .
     environment:
-      DB_URL: jdbc:postgresql://bd:5432/${POSTGRES_DB:-estudiantes}
+      # DEFECTO SEMBRADO: la aplicación espera DB_URL.
+      DB_URI: jdbc:postgresql://bd:5432/${POSTGRES_DB:-estudiantes}
       DB_USUARIO: ${POSTGRES_USER:-estudiante}
       DB_CLAVE: ${POSTGRES_PASSWORD:-estudiante_local}
     depends_on:
