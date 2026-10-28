@@ -95,7 +95,22 @@ public class EstudianteRepositorioJdbc implements EstudianteRepositorio {
 
   @Override
   public boolean existeNombreEnCarrera(String nombre, Carrera carrera, Long excluirId) {
-    throw new UnsupportedOperationException("Pendiente: TDD paso verde");
+    String sql =
+        "SELECT EXISTS (SELECT 1 FROM estudiante WHERE nombre = ? AND carrera = ?"
+            + " AND (?::bigint IS NULL OR id <> ?))";
+    try (Connection cx = dataSource.getConnection();
+        PreparedStatement ps = cx.prepareStatement(sql)) {
+      ps.setString(1, nombre);
+      ps.setString(2, carrera.name());
+      ps.setObject(3, excluirId);
+      ps.setObject(4, excluirId);
+      try (ResultSet rs = ps.executeQuery()) {
+        rs.next();
+        return rs.getBoolean(1);
+      }
+    } catch (SQLException e) {
+      throw new RepositorioException("No se pudo verificar el nombre duplicado", e);
+    }
   }
 
   private Estudiante mapear(ResultSet rs) throws SQLException {

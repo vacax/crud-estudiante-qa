@@ -2,6 +2,7 @@ package edu.pucmm.estudiante.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.pucmm.estudiante.dominio.ErrorValidacion;
+import edu.pucmm.estudiante.dominio.EstudianteDuplicadoException;
 import edu.pucmm.estudiante.dominio.EstudianteNoEncontradoException;
 import edu.pucmm.estudiante.dominio.EstudianteSolicitud;
 import edu.pucmm.estudiante.dominio.ValidacionException;
@@ -39,6 +40,11 @@ public class EstudianteControlador {
         (e, ctx) ->
             responder(
                 ctx, HttpStatus.NOT_FOUND, List.of(new ErrorValidacion("id", e.getMessage()))));
+    rutas.exception(
+        EstudianteDuplicadoException.class,
+        (e, ctx) ->
+            responder(
+                ctx, HttpStatus.CONFLICT, List.of(new ErrorValidacion("nombre", e.getMessage()))));
     rutas.exception(
         JsonProcessingException.class,
         (e, ctx) ->

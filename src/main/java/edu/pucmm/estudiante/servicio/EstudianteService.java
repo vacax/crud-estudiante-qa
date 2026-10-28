@@ -2,6 +2,7 @@ package edu.pucmm.estudiante.servicio;
 
 import edu.pucmm.estudiante.dominio.Carrera;
 import edu.pucmm.estudiante.dominio.Estudiante;
+import edu.pucmm.estudiante.dominio.EstudianteDuplicadoException;
 import edu.pucmm.estudiante.dominio.EstudianteNoEncontradoException;
 import edu.pucmm.estudiante.dominio.EstudianteSolicitud;
 import edu.pucmm.estudiante.dominio.ValidadorEstudiante;
@@ -27,12 +28,15 @@ public class EstudianteService {
 
   public Estudiante crear(EstudianteSolicitud solicitud) {
     ValidadorEstudiante.validarOLanzar(solicitud);
-    return repositorio.guardar(aEstudiante(null, solicitud));
+    Estudiante nuevo = aEstudiante(null, solicitud);
+    verificarNoDuplicado(nuevo, null);
+    return repositorio.guardar(nuevo);
   }
 
   public Estudiante actualizar(long id, EstudianteSolicitud solicitud) {
     ValidadorEstudiante.validarOLanzar(solicitud);
     Estudiante actualizado = aEstudiante(id, solicitud);
+    verificarNoDuplicado(actualizado, id);
     if (!repositorio.actualizar(actualizado)) {
       throw new EstudianteNoEncontradoException(id);
     }
@@ -42,6 +46,16 @@ public class EstudianteService {
   public void eliminar(long id) {
     if (!repositorio.eliminar(id)) {
       throw new EstudianteNoEncontradoException(id);
+    }
+  }
+
+  private void verificarNoDuplicado(Estudiante estudiante, Long excluirId) {
+    if (repositorio.existeNombreEnCarrera(estudiante.nombre(), estudiante.carrera(), excluirId)) {
+      throw new EstudianteDuplicadoException(
+          "Ya existe un estudiante llamado "
+              + estudiante.nombre()
+              + " en la carrera "
+              + estudiante.carrera());
     }
   }
 
