@@ -29,7 +29,10 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    // Persistencia (fase 2). Javalin y Jackson llegan en la fase 3.
+    // Web (fase 3). JavalinJackson usa Jackson 2.x (com.fasterxml) por defecto.
+    implementation libs.javalin
+    implementation libs.jackson.databind
+    // Persistencia (fase 2).
     implementation libs.postgresql
     implementation libs.hikari
     implementation libs.flyway.core
@@ -82,6 +85,14 @@ testing {
                 implementation testFixtures(project())
                 implementation libs.assertj
                 implementation libs.rest.assured
+                implementation libs.javalin
+                implementation libs.jackson.databind
+                // Cucumber 8 necesita Jackson (databind + jdk8) para escribir reportes JSON/HTML.
+                implementation libs.jackson.jdk8
+                implementation libs.postgresql
+                implementation libs.hikari
+                implementation libs.flyway.core
+                runtimeOnly libs.flyway.postgresql
                 implementation platform(libs.cucumber.bom)
                 implementation libs.cucumber.java
                 implementation libs.cucumber.junit.platform.engine
@@ -91,7 +102,13 @@ testing {
                 implementation libs.testcontainers.junit.jupiter
             }
             targets.configureEach {
-                testTask.configure { shouldRunAfter(tasks.named('integrationTest')) }
+                testTask.configure {
+                    shouldRunAfter(tasks.named('integrationTest'))
+                    // El motor cucumber lo descubre la suite @Suite; reportes en build/reports/cucumber.
+                    reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/acceptanceTest')
+                    // Los plugins escriben aqui; se declara para que Gradle lo trate como salida.
+                    outputs.dir(layout.buildDirectory.dir('reports/cucumber'))
+                }
             }
         }
 
