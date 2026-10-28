@@ -1,0 +1,140 @@
+plugins {
+    id 'application'
+    id 'java-test-fixtures'
+    id 'jvm-test-suite'
+    id 'jacoco'
+    alias(libs.plugins.spotless)
+}
+
+group = 'edu.pucmm'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+application {
+    mainClass = 'edu.pucmm.estudiante.Aplicacion'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+dependencies {
+    // Dependencias de runtime de fases futuras (web y persistencia) se agregaran en sus fases:
+    // javalin, jackson, postgresql, hikari, flyway (ver gradle/libs.versions.toml).
+}
+
+testing {
+    suites {
+        // Nivel 1: pruebas unitarias (sin BD, sin red, sin Javalin).
+        test {
+            useJUnitJupiter(libs.versions.junit)
+            dependencies {
+                implementation testFixtures(project())
+                implementation libs.assertj
+                implementation libs.mockito.core
+                implementation libs.mockito.junit.jupiter
+            }
+        }
+
+        // Nivel 2: integracion (repositorio JDBC + Flyway contra PostgreSQL real).
+        integrationTest(JvmTestSuite) {
+            useJUnitJupiter(libs.versions.junit)
+            dependencies {
+                implementation project()
+                implementation testFixtures(project())
+                implementation libs.assertj
+                implementation libs.testcontainers.postgresql
+                implementation libs.testcontainers.junit.jupiter
+                implementation libs.postgresql
+                implementation libs.hikari
+                implementation libs.flyway.core
+                runtimeOnly libs.flyway.postgresql
+            }
+            targets.configureEach {
+                testTask.configure { shouldRunAfter(tasks.named('test')) }
+            }
+        }
+
+        // Nivel 3: aceptacion (Cucumber en espanol + REST Assured).
+        acceptanceTest(JvmTestSuite) {
+            useJUnitJupiter(libs.versions.junit)
+            dependencies {
+                implementation project()
+                implementation testFixtures(project())
+                implementation libs.assertj
+                implementation libs.rest.assured
+                implementation platform(libs.cucumber.bom)
+                implementation libs.cucumber.java
+                implementation libs.cucumber.junit.platform.engine
+                implementation platform(libs.junit.bom)
+                implementation libs.junit.platform.suite
+                implementation libs.testcontainers.postgresql
+                implementation libs.testcontainers.junit.jupiter
+            }
+            targets.configureEach {
+                testTask.configure { shouldRunAfter(tasks.named('integrationTest')) }
+            }
+        }
+
+        // Nivel 4: end to end (stack completo con ComposeContainer + Playwright).
+        e2eTest(JvmTestSuite) {
+            useJUnitJupiter(libs.versions.junit)
+            dependencies {
+                implementation project()
+                implementation testFixtures(project())
+                implementation libs.assertj
+                implementation libs.rest.assured
+                implementation libs.playwright
+                implementation libs.testcontainers.postgresql
+                implementation libs.testcontainers.junit.jupiter
+            }
+            targets.configureEach {
+                testTask.configure { shouldRunAfter(tasks.named('acceptanceTest')) }
+            }
+        }
+    }
+}
+
+jacoco {
+    toolVersion = libs.versions.jacoco.get()
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn tasks.named('test')
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        googleJavaFormat(libs.versions.googleJavaFormat.get())
+        removeUnusedImports()
+        endWithNewline()
+    }
+}
+
+// spotlessCheck ya se engancha a 'check'; se deja explicito por claridad didactica.
+tasks.named('check') {
+    dependsOn tasks.named('spotlessCheck')
+}

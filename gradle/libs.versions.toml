@@ -1,0 +1,50 @@
+# Catalogo de versiones (todas verificadas con >= 14 dias de publicadas; ver VERSIONES.md)
+[versions]
+javalin = "7.2.3"
+jackson = "2.22.3"
+slf4j = "2.0.20"
+postgresql = "42.7.14"
+hikari = "7.1.0"
+flyway = "13.10.0"
+junit = "6.1.3"
+assertj = "3.27.7"
+mockito = "5.24.0"
+restAssured = "6.1.0"
+cucumber = "8.0.4"
+testcontainers = "2.0.5"
+playwright = "1.63.0"
+spotless = "8.10.4"
+googleJavaFormat = "1.36.1"
+jacoco = "0.8.15"
+pitPlugin = "1.19.0"
+pitest = "1.30.0"
+pitestJunit5 = "1.2.3"
+
+[libraries]
+javalin = { module = "io.javalin:javalin", version.ref = "javalin" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+junit-platform-suite = { module = "org.junit.platform:junit-platform-suite" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+rest-assured = { module = "io.rest-assured:rest-assured", version.ref = "restAssured" }
+cucumber-bom = { module = "io.cucumber:cucumber-bom", version.ref = "cucumber" }
+cucumber-java = { module = "io.cucumber:cucumber-java" }
+cucumber-junit-platform-engine = { module = "io.cucumber:cucumber-junit-platform-engine" }
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
+playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
+pitest-junit5 = { module = "org.pitest:pitest-junit5-plugin", version.ref = "pitestJunit5" }
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+pitest = { id = "info.solidsoft.pitest", version.ref = "pitPlugin" }
