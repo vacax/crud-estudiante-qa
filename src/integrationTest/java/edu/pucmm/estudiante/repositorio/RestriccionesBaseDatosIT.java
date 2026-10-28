@@ -15,6 +15,7 @@ class RestriccionesBaseDatosIT extends BasePostgresIT {
 
   private static final String CHECK_VIOLATION = "23514";
   private static final String NOT_NULL_VIOLATION = "23502";
+  private static final String UNIQUE_VIOLATION = "23505";
 
   private static void insertar(String nombre, String carrera, String correo) throws SQLException {
     try (Connection cx = DATA_SOURCE.getConnection();
@@ -91,5 +92,21 @@ class RestriccionesBaseDatosIT extends BasePostgresIT {
   @DisplayName("el CHECK rechaza un nombre con espacios al final")
   void nombreConEspacioAlFinal() {
     esperarViolacion(CHECK_VIOLATION, () -> insertar("Ana Pérez ", "ISC", "ana@ejemplo.edu"));
+  }
+
+  @Test
+  @DisplayName("UNIQUE rechaza dos estudiantes con el mismo nombre en la misma carrera")
+  void mismoNombreMismaCarrera() throws SQLException {
+    insertar("Ana Pérez", "ISC", "ana1@ejemplo.edu");
+
+    esperarViolacion(UNIQUE_VIOLATION, () -> insertar("Ana Pérez", "ISC", "ana2@ejemplo.edu"));
+  }
+
+  @Test
+  @DisplayName("el mismo nombre en otra carrera es válido")
+  void mismoNombreOtraCarrera() throws SQLException {
+    insertar("Ana Pérez", "ISC", "ana1@ejemplo.edu");
+
+    insertar("Ana Pérez", "ITT", "ana2@ejemplo.edu");
   }
 }

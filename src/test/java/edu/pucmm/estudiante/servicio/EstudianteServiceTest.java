@@ -3,6 +3,7 @@ package edu.pucmm.estudiante.servicio;
 import static edu.pucmm.estudiante.pruebas.EstudianteBuilder.unEstudiante;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import edu.pucmm.estudiante.dominio.Carrera;
 import edu.pucmm.estudiante.dominio.Estudiante;
+import edu.pucmm.estudiante.dominio.EstudianteDuplicadoException;
 import edu.pucmm.estudiante.dominio.EstudianteNoEncontradoException;
 import edu.pucmm.estudiante.dominio.ValidacionException;
 import edu.pucmm.estudiante.repositorio.EstudianteRepositorio;
@@ -132,5 +134,69 @@ class EstudianteServiceTest {
 
     assertThatThrownBy(() -> servicio.eliminar(99L))
         .isInstanceOf(EstudianteNoEncontradoException.class);
+  }
+
+  // ---- Regla: no se permiten dos estudiantes con el mismo nombre en la misma carrera ----
+
+  @Test
+  @DisplayName("crear con nombre repetido en la misma carrera lanza EstudianteDuplicadoException")
+  void crearDuplicado() {
+    when(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, null)).thenReturn(true);
+
+    assertThatThrownBy(() -> servicio.crear(unEstudiante().solicitud()))
+        .isInstanceOf(EstudianteDuplicadoException.class);
+
+    verify(repositorio, never()).guardar(any());
+  }
+
+  @Test
+  @DisplayName("crear sin duplicado consulta la regla y guarda")
+  void crearSinDuplicado() {
+    var sinId = unEstudiante().construir();
+    when(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, null)).thenReturn(false);
+    when(repositorio.guardar(sinId)).thenReturn(unEstudiante().conId(1L).construir());
+
+    servicio.crear(unEstudiante().solicitud());
+
+    verify(repositorio).existeNombreEnCarrera("Ana Pérez", Carrera.ISC, null);
+    verify(repositorio).guardar(sinId);
+  }
+
+  @Test
+  @DisplayName("crear con el mismo nombre en otra carrera se permite")
+  void crearMismoNombreOtraCarrera() {
+    var sinId = unEstudiante().conCarrera("ITT").construir();
+    when(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ITT, null)).thenReturn(false);
+    when(repositorio.guardar(sinId)).thenReturn(unEstudiante().conId(2L).construir());
+
+    servicio.crear(unEstudiante().conCarrera("ITT").solicitud());
+
+    verify(repositorio).existeNombreEnCarrera("Ana Pérez", Carrera.ITT, null);
+    verify(repositorio).guardar(sinId);
+  }
+
+  @Test
+  @DisplayName(
+      "actualizar con nombre y carrera de otro estudiante lanza EstudianteDuplicadoException")
+  void actualizarDuplicadoDeOtro() {
+    when(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, 5L)).thenReturn(true);
+
+    assertThatThrownBy(() -> servicio.actualizar(5L, unEstudiante().solicitud()))
+        .isInstanceOf(EstudianteDuplicadoException.class);
+
+    verify(repositorio, never()).actualizar(any());
+  }
+
+  @Test
+  @DisplayName("actualizar conservando su propio nombre y carrera no lanza (se excluye a sí mismo)")
+  void actualizarConservandoSuPropioNombre() {
+    var esperado = unEstudiante().conId(5L).construir();
+    when(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, 5L)).thenReturn(false);
+    when(repositorio.actualizar(esperado)).thenReturn(true);
+
+    var resultado = servicio.actualizar(5L, unEstudiante().solicitud());
+
+    assertThat(resultado).isEqualTo(esperado);
+    verify(repositorio).existeNombreEnCarrera("Ana Pérez", Carrera.ISC, 5L);
   }
 }

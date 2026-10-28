@@ -142,4 +142,32 @@ class EstudianteRepositorioJdbcIT extends BasePostgresIT {
   void idsReiniciadosEntrePruebas() {
     assertThat(repositorio.guardar(unEstudiante().construir()).id()).isEqualTo(1L);
   }
+
+  @Test
+  @DisplayName("existeNombreEnCarrera es true si hay un estudiante con ese nombre y carrera")
+  void existeNombreEnCarreraVerdadero() {
+    repositorio.guardar(unEstudiante().construir());
+
+    assertThat(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, null)).isTrue();
+  }
+
+  @Test
+  @DisplayName("existeNombreEnCarrera es false para otra carrera o para otro nombre")
+  void existeNombreEnCarreraFalso() {
+    repositorio.guardar(unEstudiante().construir());
+
+    assertThat(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ITT, null)).isFalse();
+    assertThat(repositorio.existeNombreEnCarrera("Otra Persona", Carrera.ISC, null)).isFalse();
+  }
+
+  @Test
+  @DisplayName("existeNombreEnCarrera ignora al estudiante excluido pero no a otros")
+  void existeNombreEnCarreraConExclusion() {
+    Estudiante guardado = repositorio.guardar(unEstudiante().construir());
+
+    assertThat(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, guardado.id()))
+        .isFalse();
+    assertThat(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, guardado.id() + 1))
+        .isTrue();
+  }
 }

@@ -24,12 +24,16 @@ public class PasosEstudiante {
 
   private Response ultimaRespuesta;
   private String ubicacionCreado;
+  private String nombreExistente;
+  private String carreraExistente;
 
   @Before
   public void limpiarDatos() throws SQLException {
     Entorno.limpiarDatos();
     ultimaRespuesta = null;
     ubicacionCreado = null;
+    nombreExistente = null;
+    carreraExistente = null;
   }
 
   private static RequestSpecification peticion() {
@@ -59,6 +63,8 @@ public class PasosEstudiante {
             .post("/api/estudiantes");
     assertThat(r.statusCode()).isEqualTo(201);
     ubicacionCreado = r.header("Location");
+    nombreExistente = nombre;
+    carreraExistente = carrera;
   }
 
   // ---- Cuando ----
@@ -80,6 +86,19 @@ public class PasosEstudiante {
                     .solicitud())
             .post("/api/estudiantes");
     ubicacionCreado = ultimaRespuesta.header("Location");
+  }
+
+  @Cuando("intento registrar otro estudiante con el mismo nombre y carrera")
+  public void intentoRegistrarOtroConElMismoNombreYCarrera() {
+    ultimaRespuesta =
+        peticion()
+            .body(
+                unEstudiante()
+                    .conNombre(nombreExistente)
+                    .conCarrera(carreraExistente)
+                    .conCorreo("otro.correo@ejemplo.edu")
+                    .solicitud())
+            .post("/api/estudiantes");
   }
 
   @Cuando("consulto el estudiante número {int}")
@@ -127,6 +146,11 @@ public class PasosEstudiante {
   @Entonces("el sistema rechaza el registro")
   public void elSistemaRechazaElRegistro() {
     assertThat(ultimaRespuesta.statusCode()).isEqualTo(400);
+  }
+
+  @Entonces("el sistema informa un conflicto")
+  public void elSistemaInformaUnConflicto() {
+    assertThat(ultimaRespuesta.statusCode()).isEqualTo(409);
   }
 
   @Y("indica un error en el campo {string}")

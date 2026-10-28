@@ -93,6 +93,11 @@ public class EstudianteRepositorioJdbc implements EstudianteRepositorio {
     }
   }
 
+  @Override
+  public boolean existeNombreEnCarrera(String nombre, Carrera carrera, Long excluirId) {
+    throw new UnsupportedOperationException("Pendiente: TDD paso verde");
+  }
+
   private Estudiante mapear(ResultSet rs) throws SQLException {
     return new Estudiante(
         rs.getLong("id"),

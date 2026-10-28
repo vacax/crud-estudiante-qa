@@ -1,5 +1,6 @@
 package edu.pucmm.estudiante.repositorio;
 
+import edu.pucmm.estudiante.dominio.Carrera;
 import edu.pucmm.estudiante.dominio.Estudiante;
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,10 @@ public interface EstudianteRepositorio {
 
   /** Elimina por id; devuelve {@code true} si existía. */
   boolean eliminar(long id);
+
+  /**
+   * Indica si ya existe un estudiante con ese nombre en esa carrera, ignorando al de id {@code
+   * excluirId} (puede ser {@code null} al crear).
+   */
+  boolean existeNombreEnCarrera(String nombre, Carrera carrera, Long excluirId);
 }

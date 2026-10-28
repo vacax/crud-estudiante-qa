@@ -17,6 +17,12 @@ Característica: Gestión de estudiantes
     Entonces el sistema rechaza el registro
     Y indica un error en el campo "carrera"
 
+  Escenario: Rechazar un estudiante duplicado en la misma carrera
+    Dado que existe el estudiante "Ana Pérez" de la carrera "ISC"
+    Cuando intento registrar otro estudiante con el mismo nombre y carrera
+    Entonces el sistema informa un conflicto
+    Y indica un error en el campo "nombre"
+
   Escenario: Consultar un estudiante inexistente
     Cuando consulto el estudiante número 9999
     Entonces el sistema informa que ese estudiante no existe
