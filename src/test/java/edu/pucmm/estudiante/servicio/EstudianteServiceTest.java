@@ -58,7 +58,7 @@ class EstudianteServiceTest {
   }
 
   @Test
-  @DisplayName("crear un estudiante valido lo guarda en el repositorio y devuelve el id asignado")
+  @DisplayName("crear un estudiante válido lo guarda en el repositorio y devuelve el id asignado")
   void crearValido() {
     var sinId = unEstudiante().construir();
     var conId = unEstudiante().conId(1L).construir();
@@ -72,7 +72,7 @@ class EstudianteServiceTest {
   }
 
   @Test
-  @DisplayName("crear un estudiante invalido lanza ValidacionException y no toca el repositorio")
+  @DisplayName("crear un estudiante inválido lanza ValidacionException y no toca el repositorio")
   void crearInvalido() {
     var invalida = unEstudiante().conNombre("a").conCarrera("XXX").solicitud();
 
@@ -105,7 +105,7 @@ class EstudianteServiceTest {
   }
 
   @Test
-  @DisplayName("actualizar con datos invalidos lanza ValidacionException y no toca el repositorio")
+  @DisplayName("actualizar con datos inválidos lanza ValidacionException y no toca el repositorio")
   void actualizarInvalido() {
     var invalida = unEstudiante().conCorreo("malo").solicitud();
 

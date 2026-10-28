@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Reglas de validacion de {@link EstudianteSolicitud}. Acumula todos los errores encontrados. */
+/** Reglas de validación de {@link EstudianteSolicitud}. Acumula todos los errores encontrados. */
 public final class ValidadorEstudiante {
 
   public static final int NOMBRE_MIN = 2;
@@ -12,7 +12,7 @@ public final class ValidadorEstudiante {
 
   /**
    * Regex de correo deliberadamente sencilla (no cubre todo el RFC 5322): parte local con letras,
-   * digitos y {@code . _ % + -}; arroba; dominio con etiquetas separadas por punto y un TLD de al
+   * dígitos y {@code . _ % + -}; arroba; dominio con etiquetas separadas por punto y un TLD de al
    * menos 2 letras. Sin espacios.
    */
   static final Pattern CORREO =
@@ -20,7 +20,7 @@ public final class ValidadorEstudiante {
 
   private ValidadorEstudiante() {}
 
-  /** Devuelve la lista de errores (vacia si la solicitud es valida). */
+  /** Devuelve la lista de errores (vacía si la solicitud es válida). */
   public static List<ErrorValidacion> validar(EstudianteSolicitud solicitud) {
     List<ErrorValidacion> errores = new ArrayList<>();
     validarNombre(solicitud.nombre(), errores);
@@ -59,7 +59,7 @@ public final class ValidadorEstudiante {
       errores.add(new ErrorValidacion("carrera", "La carrera es obligatoria"));
     } else if (Carrera.desdeTexto(carrera) == null) {
       errores.add(
-          new ErrorValidacion("carrera", "La carrera no pertenece al catalogo: " + carrera));
+          new ErrorValidacion("carrera", "La carrera no pertenece al catálogo: " + carrera));
     }
   }
 
@@ -67,7 +67,7 @@ public final class ValidadorEstudiante {
     if (correo == null || correo.isEmpty()) {
       errores.add(new ErrorValidacion("correo", "El correo es obligatorio"));
     } else if (!CORREO.matcher(correo).matches()) {
-      errores.add(new ErrorValidacion("correo", "El correo no tiene un formato valido"));
+      errores.add(new ErrorValidacion("correo", "El correo no tiene un formato válido"));
     }
   }
 }

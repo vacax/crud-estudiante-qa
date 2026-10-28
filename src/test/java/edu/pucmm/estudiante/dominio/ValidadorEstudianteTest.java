@@ -20,20 +20,20 @@ class ValidadorEstudianteTest {
   }
 
   @Test
-  @DisplayName("una solicitud valida no produce errores")
+  @DisplayName("una solicitud válida no produce errores")
   void solicitudValida() {
     assertThat(ValidadorEstudiante.validar(unEstudiante().solicitud())).isEmpty();
   }
 
-  @ParameterizedTest(name = "nombre de {0} caracteres es valido")
-  @DisplayName("nombres con longitud en el limite permitido son validos")
+  @ParameterizedTest(name = "nombre de {0} caracteres es válido")
+  @DisplayName("nombres con longitud en el límite permitido son válidos")
   @ValueSource(ints = {2, 3, 99, 100})
   void nombreLongitudValida(int longitud) {
     assertThat(validarNombre("a".repeat(longitud))).isEmpty();
   }
 
-  @ParameterizedTest(name = "nombre de {0} caracteres es invalido")
-  @DisplayName("nombres fuera del rango 2..100 son invalidos")
+  @ParameterizedTest(name = "nombre de {0} caracteres es inválido")
+  @DisplayName("nombres fuera del rango 2..100 son inválidos")
   @ValueSource(ints = {1, 101, 500})
   void nombreLongitudInvalida(int longitud) {
     assertThat(validarNombre("a".repeat(longitud)))
@@ -41,8 +41,8 @@ class ValidadorEstudianteTest {
             new ErrorValidacion("nombre", "El nombre debe tener entre 2 y 100 caracteres"));
   }
 
-  @ParameterizedTest(name = "nombre null o vacio ({0}) es obligatorio")
-  @DisplayName("nombre null o vacio es obligatorio")
+  @ParameterizedTest(name = "nombre null o vacío ({0}) es obligatorio")
+  @DisplayName("nombre null o vacío es obligatorio")
   @NullAndEmptySource
   void nombreObligatorio(String nombre) {
     assertThat(validarNombre(nombre))
@@ -50,7 +50,7 @@ class ValidadorEstudianteTest {
   }
 
   @ParameterizedTest(name = "[{0}] tiene espacios en los bordes")
-  @DisplayName("nombres con espacios al inicio o al final son invalidos")
+  @DisplayName("nombres con espacios al inicio o al final son inválidos")
   @ValueSource(strings = {" Ana", "Ana ", " Ana ", "\tAna", "Ana\n"})
   void nombreConEspaciosEnBordes(String nombre) {
     assertThat(validarNombre(nombre))
@@ -60,38 +60,38 @@ class ValidadorEstudianteTest {
   }
 
   @Test
-  @DisplayName("espacios internos en el nombre son validos")
+  @DisplayName("espacios internos en el nombre son válidos")
   void nombreConEspaciosInternos() {
-    assertThat(validarNombre("Ana Maria de los Santos")).isEmpty();
+    assertThat(validarNombre("Ana María de los Santos")).isEmpty();
   }
 
-  @ParameterizedTest(name = "carrera {0} pertenece al catalogo")
-  @DisplayName("todas las carreras del catalogo son validas")
+  @ParameterizedTest(name = "carrera {0} pertenece al catálogo")
+  @DisplayName("todas las carreras del catálogo son válidas")
   @ValueSource(strings = {"ISC", "ITT", "IME", "IIS", "ICI"})
   void carreraValida(String carrera) {
     assertThat(ValidadorEstudiante.validar(unEstudiante().conCarrera(carrera).solicitud()))
         .isEmpty();
   }
 
-  @ParameterizedTest(name = "carrera [{0}] no pertenece al catalogo")
-  @DisplayName("carreras fuera del catalogo o en minusculas son invalidas")
+  @ParameterizedTest(name = "carrera [{0}] no pertenece al catálogo")
+  @DisplayName("carreras fuera del catálogo o en minúsculas son inválidas")
   @ValueSource(strings = {"XXX", "isc", "Isc", "ISC ", "MED", "INFORMATICA"})
   void carreraFueraDelCatalogo(String carrera) {
     assertThat(ValidadorEstudiante.validar(unEstudiante().conCarrera(carrera).solicitud()))
         .containsExactly(
-            new ErrorValidacion("carrera", "La carrera no pertenece al catalogo: " + carrera));
+            new ErrorValidacion("carrera", "La carrera no pertenece al catálogo: " + carrera));
   }
 
-  @ParameterizedTest(name = "carrera null o vacia ({0}) es obligatoria")
-  @DisplayName("carrera null o vacia es obligatoria")
+  @ParameterizedTest(name = "carrera null o vacía ({0}) es obligatoria")
+  @DisplayName("carrera null o vacía es obligatoria")
   @NullAndEmptySource
   void carreraObligatoria(String carrera) {
     assertThat(ValidadorEstudiante.validar(unEstudiante().conCarrera(carrera).solicitud()))
         .containsExactly(new ErrorValidacion("carrera", "La carrera es obligatoria"));
   }
 
-  @ParameterizedTest(name = "correo [{0}] es valido")
-  @DisplayName("correos con formato valido son aceptados")
+  @ParameterizedTest(name = "correo [{0}] es válido")
+  @DisplayName("correos con formato válido son aceptados")
   @ValueSource(
       strings = {
         "a@b.co",
@@ -103,8 +103,8 @@ class ValidadorEstudianteTest {
     assertThat(ValidadorEstudiante.validar(unEstudiante().conCorreo(correo).solicitud())).isEmpty();
   }
 
-  @ParameterizedTest(name = "correo [{0}] es invalido")
-  @DisplayName("correos con formato invalido son rechazados")
+  @ParameterizedTest(name = "correo [{0}] es inválido")
+  @DisplayName("correos con formato inválido son rechazados")
   @ValueSource(
       strings = {
         "sinarroba",
@@ -119,11 +119,11 @@ class ValidadorEstudianteTest {
       })
   void correoInvalido(String correo) {
     assertThat(ValidadorEstudiante.validar(unEstudiante().conCorreo(correo).solicitud()))
-        .containsExactly(new ErrorValidacion("correo", "El correo no tiene un formato valido"));
+        .containsExactly(new ErrorValidacion("correo", "El correo no tiene un formato válido"));
   }
 
-  @ParameterizedTest(name = "correo null o vacio ({0}) es obligatorio")
-  @DisplayName("correo null o vacio es obligatorio")
+  @ParameterizedTest(name = "correo null o vacío ({0}) es obligatorio")
+  @DisplayName("correo null o vacío es obligatorio")
   @NullAndEmptySource
   void correoObligatorio(String correo) {
     assertThat(ValidadorEstudiante.validar(unEstudiante().conCorreo(correo).solicitud()))
@@ -160,7 +160,7 @@ class ValidadorEstudianteTest {
   }
 
   @Test
-  @DisplayName("validarOLanzar no lanza nada con una solicitud valida")
+  @DisplayName("validarOLanzar no lanza nada con una solicitud válida")
   void validarOLanzarSinErrores() {
     ValidadorEstudiante.validarOLanzar(unEstudiante().solicitud());
   }

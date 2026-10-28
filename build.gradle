@@ -29,8 +29,12 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    // Dependencias de runtime de fases futuras (web y persistencia) se agregaran en sus fases:
-    // javalin, jackson, postgresql, hikari, flyway (ver gradle/libs.versions.toml).
+    // Persistencia (fase 2). Javalin y Jackson llegan en la fase 3.
+    implementation libs.postgresql
+    implementation libs.hikari
+    implementation libs.flyway.core
+    runtimeOnly libs.flyway.postgresql
+    runtimeOnly libs.slf4j.simple
 }
 
 testing {
@@ -61,7 +65,12 @@ testing {
                 runtimeOnly libs.flyway.postgresql
             }
             targets.configureEach {
-                testTask.configure { shouldRunAfter(tasks.named('test')) }
+                testTask.configure {
+                    shouldRunAfter(tasks.named('test'))
+                    // Ejecutable sola: ./gradlew integrationTest (aun no se engancha a 'check').
+                    // Reporte HTML en build/reports/tests/integrationTest.
+                    reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/integrationTest')
+                }
             }
         }
 

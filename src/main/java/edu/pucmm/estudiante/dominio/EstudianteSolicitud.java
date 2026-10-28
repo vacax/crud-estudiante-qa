@@ -5,7 +5,7 @@ package edu.pucmm.estudiante.dominio;
  * recibe la API, y se validan con {@link ValidadorEstudiante}.
  *
  * @param nombre nombre recibido
- * @param carrera codigo de carrera recibido
+ * @param carrera código de carrera recibido
  * @param correo correo recibido
  */
 public record EstudianteSolicitud(String nombre, String carrera, String correo) {}

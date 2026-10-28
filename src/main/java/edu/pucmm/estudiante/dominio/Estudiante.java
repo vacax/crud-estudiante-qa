@@ -5,8 +5,8 @@ package edu.pucmm.estudiante.dominio;
  *
  * @param id identificador generado por la base de datos; {@code null} antes de persistir
  * @param nombre nombre completo
- * @param carrera carrera del catalogo
- * @param correo correo electronico
+ * @param carrera carrera del catálogo
+ * @param correo correo electrónico
  */
 public record Estudiante(Long id, String nombre, Carrera carrera, String correo) {
 

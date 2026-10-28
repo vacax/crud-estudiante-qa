@@ -11,7 +11,7 @@ import edu.pucmm.estudiante.dominio.EstudianteSolicitud;
 public final class EstudianteBuilder {
 
   private Long id = null;
-  private String nombre = "Ana Perez";
+  private String nombre = "Ana Pérez";
   private String carrera = Carrera.ISC.name();
   private String correo = "ana.perez@ejemplo.edu";
 
@@ -45,7 +45,7 @@ public final class EstudianteBuilder {
     return new EstudianteSolicitud(nombre, carrera, correo);
   }
 
-  /** Construye la entidad; la carrera debe pertenecer al catalogo. */
+  /** Construye la entidad; la carrera debe pertenecer al catálogo. */
   public Estudiante construir() {
     return new Estudiante(id, nombre, Carrera.desdeTexto(carrera), correo);
   }

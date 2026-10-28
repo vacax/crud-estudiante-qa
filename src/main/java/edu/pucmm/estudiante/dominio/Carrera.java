@@ -1,9 +1,9 @@
 package edu.pucmm.estudiante.dominio;
 
 /**
- * Catalogo cerrado de carreras.
+ * Catálogo cerrado de carreras.
  *
- * <p>Nota: el catalogo es didactico; no representa la oferta academica real de ninguna institucion.
+ * <p>Nota: el catálogo es didáctico; no representa la oferta académica real de ninguna institución.
  */
 public enum Carrera {
   ISC,
@@ -13,10 +13,10 @@ public enum Carrera {
   ICI;
 
   /**
-   * Convierte un texto a {@link Carrera} de forma estricta (distingue mayusculas).
+   * Convierte un texto a {@link Carrera} de forma estricta (distingue mayúsculas).
    *
    * @param texto valor recibido, puede ser null
-   * @return la carrera, o {@code null} si el texto es null o no pertenece al catalogo
+   * @return la carrera, o {@code null} si el texto es null o no pertenece al catálogo
    */
   public static Carrera desdeTexto(String texto) {
     if (texto == null) {
