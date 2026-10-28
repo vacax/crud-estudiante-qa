@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 /** Reglas de validación de {@link EstudianteSolicitud}. Acumula todos los errores encontrados. */
 public final class ValidadorEstudiante {
 
-  public static final int NOMBRE_MIN = 2;
+  public static final int NOMBRE_MIN = 1; // DEFECTO SEMBRADO: debería ser 2
   public static final int NOMBRE_MAX = 100;
 
   /**
