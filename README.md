@@ -193,8 +193,9 @@ calidad → unit → integracion → aceptacion → build-imagen → e2e → rep
 ## Defectos sembrados
 
 Cuatro ramas `defecto/*` introducen, cada una, un error que atrapa un nivel concreto. En GitHub
-Actions se ve qué job se pone en rojo en cada una. Detalle, resultados locales por nivel y enlaces
-a los runs en [`docs/DEFECTOS.md`](docs/DEFECTOS.md).
+Actions se ve qué job se pone en rojo en cada una. Enlaces a los runs y cómo reproducirlos en
+[`docs/DEFECTOS.md`](docs/DEFECTOS.md); el análisis por nivel es parte de la
+[guía para estudiantes](docs/GUIA-ESTUDIANTE.md).
 
 | Rama | Defecto | Nivel que lo atrapa |
 |---|---|---|
@@ -210,4 +211,5 @@ a los runs en [`docs/DEFECTOS.md`](docs/DEFECTOS.md).
 | [`VERSIONES.md`](VERSIONES.md) | Versión, fecha de publicación y fuente de cada dependencia, plugin, imagen y Action; desvíos justificados |
 | [`docs/TDD.md`](docs/TDD.md) | Ciclo rojo → verde → refactor de la regla "nombre único por carrera", con hashes y salida real |
 | [`docs/TESTCONTAINERS.md`](docs/TESTCONTAINERS.md) | Por qué PostgreSQL real y no H2 (con diferencias medidas), requisitos en CI, reutilización local |
-| [`docs/DEFECTOS.md`](docs/DEFECTOS.md) | Matriz de defectos sembrados con resultados y enlaces a los runs de CI |
+| [`docs/DEFECTOS.md`](docs/DEFECTOS.md) | Ramas de defectos sembrados con enlaces a los runs de CI |
+| [`docs/GUIA-ESTUDIANTE.md`](docs/GUIA-ESTUDIANTE.md) | **Asignación para estudiantes:** guía paso a paso para hacer fork, reproducir cada nivel y cada defecto, y responder preguntas de análisis ([plantilla de entrega](docs/ENTREGA-PLANTILLA.md)) |

@@ -115,8 +115,7 @@ Descartada: `actions/setup-java` **v6.1.0** (2026-10-14), tenía 13 días al cor
   `jackson-datatype-jdk8` además de `databind`; por eso se declara `jackson-jdk8` en la suite de
   aceptación.
 - **Gradle 9.8.1: sin `testType`.** `JvmTestSuite` ya no expone `testType`, así que no se declara.
-- **Java 25 en CI en lugar de JDK 21.** El prompt menciona JDK 21 en el workflow, pero el stack
-  del propio prompt es Java 25 (LTS) y el `Dockerfile` usa 25. Se usa **25 en todos lados** para no
-  probar con un JDK distinto del que se despliega. VERIFICAR: confirmar con el autor que 21 era un
-  descuido del prompt.
+- **Java 25 también en CI.** El prompt mencionaba JDK 21 en el workflow; el autor confirmó
+  (2026-10-28) que era un descuido. Se usa **Java 25 LTS en todos lados** (toolchain, `Dockerfile`
+  y CI), para no probar con un JDK distinto del que se despliega.
 - **Imágenes Docker.** Ver la nota `VERIFICAR` de la sección de imágenes sobre la regla de 14 días.
