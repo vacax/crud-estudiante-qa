@@ -125,7 +125,21 @@ testing {
                 implementation libs.testcontainers.junit.jupiter
             }
             targets.configureEach {
-                testTask.configure { shouldRunAfter(tasks.named('acceptanceTest')) }
+                testTask.configure {
+                    shouldRunAfter(tasks.named('acceptanceTest'))
+                    // NO forma parte de 'check': necesita Docker, imagen construida y navegador.
+                    reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/e2eTest')
+                    // Compose compartido con el despliegue real y carpeta de capturas/traces.
+                    systemProperty 'compose.archivo', file('compose.yaml').absolutePath
+                    systemProperty 'e2e.artefactos', layout.buildDirectory.dir('reports/e2e').get().asFile.absolutePath
+                    outputs.dir(layout.buildDirectory.dir('reports/e2e'))
+                    // Una sola vez por corrida (las capturas viejas no deben confundir).
+                    doFirst { delete layout.buildDirectory.dir('reports/e2e') }
+                    // En CI la imagen llega de un job previo (docker load): -PomitirConstruccionImagen.
+                    if (!project.hasProperty('omitirConstruccionImagen')) {
+                        dependsOn(tasks.named('construirImagen'))
+                    }
+                }
             }
         }
     }
@@ -163,4 +177,24 @@ spotless {
 // spotlessCheck ya se engancha a 'check'; se deja explicito por claridad didactica.
 tasks.named('check') {
     dependsOn tasks.named('spotlessCheck')
+}
+
+// Construye la imagen local que usa compose.yaml (APP_IMAGEN por defecto).
+tasks.register('construirImagen', Exec) {
+    group = 'build'
+    description = 'Construye la imagen Docker crud-estudiante-qa:local'
+    commandLine 'docker', 'build', '-t', 'crud-estudiante-qa:local', '.'
+}
+
+// Instala Chromium para Playwright. Argumentos configurables:
+//   ./gradlew instalarNavegadores                              -> "install chromium" (local, sin sudo)
+//   ./gradlew instalarNavegadores -PplaywrightArgs="install --with-deps chromium"   (CI/Linux limpio)
+// e2eTest NO depende de esta tarea: Playwright for Java descarga el navegador por si solo
+// la primera vez que se crea, y --with-deps requiere privilegios de administrador.
+tasks.register('instalarNavegadores', JavaExec) {
+    group = 'verification'
+    description = 'Instala los navegadores de Playwright (chromium)'
+    classpath = sourceSets.e2eTest.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    args = (project.findProperty('playwrightArgs') ?: 'install chromium').toString().split(/\s+/) as List
 }

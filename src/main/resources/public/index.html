@@ -2,9 +2,59 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Estudiantes</title>
+    <link rel="stylesheet" href="estilos.css" />
   </head>
   <body>
-    <p>Marcador de posición: la interfaz llega en la fase 4.</p>
+    <main>
+      <h1>Estudiantes</h1>
+
+      <p id="mensaje-error" data-testid="mensaje-error" class="error" role="alert" hidden></p>
+      <p id="mensaje-exito" data-testid="mensaje-exito" class="exito" role="status" hidden></p>
+
+      <form id="formulario" data-testid="formulario-estudiante" novalidate>
+        <h2 id="titulo-formulario" data-testid="titulo-formulario">Nuevo estudiante</h2>
+
+        <label for="campo-nombre">Nombre</label>
+        <input id="campo-nombre" data-testid="campo-nombre" type="text" autocomplete="off" />
+        <span class="error" data-testid="error-nombre" id="error-nombre"></span>
+
+        <label for="select-carrera">Carrera</label>
+        <select id="select-carrera" data-testid="select-carrera">
+          <option value="">Seleccione una carrera</option>
+          <option value="ISC">ISC</option>
+          <option value="ITT">ITT</option>
+          <option value="IME">IME</option>
+          <option value="IIS">IIS</option>
+          <option value="ICI">ICI</option>
+        </select>
+        <span class="error" data-testid="error-carrera" id="error-carrera"></span>
+
+        <label for="campo-correo">Correo</label>
+        <input id="campo-correo" data-testid="campo-correo" type="text" autocomplete="off" />
+        <span class="error" data-testid="error-correo" id="error-correo"></span>
+
+        <div class="acciones">
+          <button type="submit" id="boton-guardar" data-testid="boton-guardar">Guardar</button>
+          <button type="button" id="boton-cancelar" data-testid="boton-cancelar">Cancelar</button>
+        </div>
+      </form>
+
+      <table id="tabla-estudiantes" data-testid="tabla-estudiantes">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Carrera</th>
+            <th>Correo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-tabla" data-testid="cuerpo-tabla"></tbody>
+      </table>
+      <p id="mensaje-vacio" data-testid="mensaje-vacio" hidden>No hay estudiantes registrados.</p>
+    </main>
+    <script src="app.js"></script>
   </body>
 </html>

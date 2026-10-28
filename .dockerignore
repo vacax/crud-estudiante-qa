@@ -1,0 +1,13 @@
+build
+.gradle
+.git
+.github
+.env
+.idea
+.claude
+src/test
+src/integrationTest
+src/acceptanceTest
+src/e2eTest
+PROMPT*.md
+*.md

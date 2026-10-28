@@ -1,0 +1,26 @@
+services:
+  bd:
+    image: postgres:18-alpine@sha256:10a5c69a83035ab5239f5620d708520e8b28f5aa1f2b20143e6024532edadfb5
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-estudiantes}
+      POSTGRES_USER: ${POSTGRES_USER:-estudiante}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-estudiante_local}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    # Sin "ports:": la BD solo es alcanzable desde la red interna de compose.
+
+  app:
+    image: ${APP_IMAGEN:-crud-estudiante-qa:local}
+    build: .
+    environment:
+      DB_URL: jdbc:postgresql://bd:5432/${POSTGRES_DB:-estudiantes}
+      DB_USUARIO: ${POSTGRES_USER:-estudiante}
+      DB_CLAVE: ${POSTGRES_PASSWORD:-estudiante_local}
+    depends_on:
+      bd:
+        condition: service_healthy
+    ports:
+      - "${APP_PUERTO:-7070}:7070"
