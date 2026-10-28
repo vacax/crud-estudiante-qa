@@ -132,6 +132,7 @@ public class EstudianteRepositorioJdbc implements EstudianteRepositorio {
         rs.getLong("id"),
         rs.getString("nombre"),
         Carrera.valueOf(rs.getString("carrera")),
-        rs.getString("correo"));
+        // DEFECTO SEMBRADO: el correo debería leerse de la columna "correo".
+        rs.getString("nombre"));
   }
 }
