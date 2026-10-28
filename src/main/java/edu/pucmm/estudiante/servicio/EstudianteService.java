@@ -51,11 +51,7 @@ public class EstudianteService {
 
   private void verificarNoDuplicado(Estudiante estudiante, Long excluirId) {
     if (repositorio.existeNombreEnCarrera(estudiante.nombre(), estudiante.carrera(), excluirId)) {
-      throw new EstudianteDuplicadoException(
-          "Ya existe un estudiante llamado "
-              + estudiante.nombre()
-              + " en la carrera "
-              + estudiante.carrera());
+      throw new EstudianteDuplicadoException(estudiante.nombre(), estudiante.carrera());
     }
   }
 

@@ -2,9 +2,11 @@ package edu.pucmm.estudiante.repositorio;
 
 import static edu.pucmm.estudiante.pruebas.EstudianteBuilder.unEstudiante;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import edu.pucmm.estudiante.dominio.Carrera;
 import edu.pucmm.estudiante.dominio.Estudiante;
+import edu.pucmm.estudiante.dominio.EstudianteDuplicadoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -169,5 +171,20 @@ class EstudianteRepositorioJdbcIT extends BasePostgresIT {
         .isFalse();
     assertThat(repositorio.existeNombreEnCarrera("Ana Pérez", Carrera.ISC, guardado.id() + 1))
         .isTrue();
+  }
+
+  /**
+   * Prueba de protección del refactor: pasa al primer intento (no hubo paso rojo) porque verifica
+   * que la BD respalda la regla aunque se salte la verificación del servicio (concurrencia).
+   */
+  @Test
+  @DisplayName(
+      "guardar dos veces el mismo nombre y carrera (sin servicio) lanza EstudianteDuplicado")
+  void guardarDuplicadoTraduceViolacionUnique() {
+    repositorio.guardar(unEstudiante().construir());
+    var otro = unEstudiante().conCorreo("otro@ejemplo.edu").construir();
+
+    assertThatThrownBy(() -> repositorio.guardar(otro))
+        .isInstanceOf(EstudianteDuplicadoException.class);
   }
 }
